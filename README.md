@@ -11,12 +11,7 @@
 
 *Developed by [Team One](CONTRIBUTING.md) as an academic project*
 
-## 🔗 Live Demo
 
-| Service | URL |
-|---------|-----|
-| **Frontend** | https://faq-v300.onrender.com |
-| **Backend API** | https://backendfaq.onrender.com |
 
 </div>
 
