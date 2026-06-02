@@ -9,7 +9,8 @@ import {
   updateFAQStatus,
   deleteFAQ,
   incrementViews,
-  exportPublishedFAQs
+  exportPublishedFAQs,
+  submitRating
 } from '../controllers/faq.controller.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 
@@ -19,6 +20,7 @@ router.get('/published', getPublishedFAQs);
 router.get('/my', authenticate, getMyFAQs);
 router.get('/export/csv', authenticate, requireAdmin, exportPublishedFAQs);
 router.patch('/:id/view', incrementViews);
+router.post('/:id/rate', submitRating);
 router.get('/:id', authenticate, getFAQById);
 router.post('/', authenticate, requireAdmin, createFAQ);
 router.get('/', authenticate, requireAdmin, getFAQs);
