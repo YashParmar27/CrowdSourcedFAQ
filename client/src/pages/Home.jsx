@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import Chatbot from '../components/Chatbot';
 
 const Home = () => {
   const [faqs, setFaqs] = useState([]);
@@ -123,6 +124,7 @@ const Home = () => {
           ))}
         </div>
       )}
+      <Chatbot />
     </div>
   );
 };
