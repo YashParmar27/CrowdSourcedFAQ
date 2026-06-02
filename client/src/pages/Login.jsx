@@ -117,11 +117,9 @@ const Login = () => {
             <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">Register here</Link>
           </p>
 
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-xs text-gray-500 text-center">
-              Demo Admin: <span className="font-mono bg-gray-100 px-1 rounded">algsoch@gmail.com</span>
-            </p>
-          </div>
+          <p className="text-center text-sm text-gray-600 mt-3">
+            <Link to="/forgot-password" className="text-blue-600 hover:text-blue-800">Forgot password?</Link>
+          </p>
         </div>
       </div>
     </div>

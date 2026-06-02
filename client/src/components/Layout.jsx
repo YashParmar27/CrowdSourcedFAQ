@@ -210,12 +210,6 @@ const Layout = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
             <p>FAQ Generator - A Team One Project</p>
-            <p className="mt-2 sm:mt-0">
-              Powered by{' '}
-              <a href="https://github.com/FiscalMindset" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
-                @FiscalMindset
-              </a>
-            </p>
           </div>
         </div>
       </footer>
