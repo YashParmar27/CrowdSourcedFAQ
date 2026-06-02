@@ -8,6 +8,7 @@ import faqRoutes from './routes/faq.routes.js';
 import userRoutes from './routes/user.routes.js';
 import activityRoutes from './routes/activity.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/faqs', faqRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
