@@ -259,6 +259,37 @@ const emails = {
     `
   }),
 
+  forgotPassword: (data) => ({
+    subject: `🔐 Password reset request for ${data.username}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Reset your password</h2>
+        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p>Hello <strong>${data.username}</strong>,</p>
+          <p>We received a request to reset your password. Click the button below to set a new password. This link will expire in 1 hour.</p>
+          <p style="text-align:center; margin: 20px 0;"><a href="${data.reset_url}" style="background:#2563eb;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;">Reset Password</a></p>
+          <p>If you did not request a password reset, you can safely ignore this email.</p>
+        </div>
+        <p style="color: #6b7280; font-size: 12px;">Time (IST): ${formatIST(data.timestamp)}</p>
+      </div>
+    `
+  }),
+
+  passwordResetConfirmation: (data) => ({
+    subject: `✅ Your password was changed`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #059669;">Password changed</h2>
+        <div style="background: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p>Hello <strong>${data.username}</strong>,</p>
+          <p>Your account password was successfully changed. If you did not perform this action, please contact support immediately.</p>
+          <p style="margin-top: 15px;"><a href="${data.client_url}" style="color: #2563eb;">Visit your account</a></p>
+        </div>
+        <p style="color: #6b7280; font-size: 12px;">Time (IST): ${formatIST(data.timestamp)}</p>
+      </div>
+    `
+  }),
+
   welcome: (data) => ({
     subject: `🎉 Welcome to FAQ Generator, ${data.username}!`,
     html: `
