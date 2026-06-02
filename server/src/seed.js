@@ -7,78 +7,55 @@ dotenv.config();
 
 const seedFAQs = [
   {
-    question: 'What is Samagama.in?',
-    answer: 'Samagama.in is a comprehensive platform that provides various digital services including web development, hosting solutions, and technical consulting for businesses of all sizes.',
+    question: 'What is Vicharanashala?',
+    answer: 'Vicharanashala (Vicharanashala Lab for Education Design or VLED) is a research and design laboratory at IIT Ropar. It focuses on creating evidence-based, technology-driven learning solutions, including gamified systems, peer assessment tools, and personalized learning pathways for educational scale.',
     category: 'general',
     status: 'published'
   },
   {
-    question: 'What services does Samagama.in offer?',
-    answer: 'Samagama.in offers a wide range of services including: Website Development, Cloud Hosting, Domain Registration, Email Solutions, SSL Certificates, SEO Optimization, and 24/7 Technical Support.',
-    category: 'services',
+    question: 'What is the ViBe platform developed by the lab?',
+    answer: 'ViBe is a Unified Educational Platform designed by Vicharanashala. It aims to enhance student engagement and interactive learning through built-in smart checks, quizzes, peer evaluation systems, and interactive progress dashboards.',
+    category: 'projects',
     status: 'published'
   },
   {
-    question: 'How can I contact Samagama.in support?',
-    answer: 'You can reach our support team through multiple channels: 1) Email at support@samagama.in, 2) Phone at +91-XXXXXXXXXX, 3) Live chat on our website, or 4) Submit a ticket through your dashboard.',
-    category: 'support',
+    question: 'What is the "AI Vicharana Shala" initiative?',
+    answer: 'AI Vicharana Shala is an immersive, hands-on program in Artificial Intelligence. It provides students and professionals with practical training in building and deploying AI applications, improving AI literacy and engineering skills.',
+    category: 'programs',
     status: 'published'
   },
   {
-    question: 'What is the uptime guarantee for hosting services?',
-    answer: 'We guarantee 99.9% uptime for all hosting plans. In the rare event that we fall below this threshold, you will receive service credits proportional to the downtime experienced.',
-    category: 'hosting',
+    question: 'How can I contact the Vicharanashala lab?',
+    answer: 'For official inquiries, research collaborations, or program questions, you can contact the lab by emailing the administrators directly at dled@iitrpr.ac.in.',
+    category: 'contact',
     status: 'published'
   },
   {
-    question: 'How do I register a domain with Samagama.in?',
-    answer: 'To register a domain: 1) Visit our website and use the domain search tool, 2) Enter your desired domain name, 3) Select your preferred extension (.com, .in, .org, etc.), 4) Complete the checkout process. Domain registration is simple and takes only a few minutes.',
-    category: 'domains',
+    question: 'What is the MMTTP Faculty Development Program?',
+    answer: 'The MMTTP program is a faculty training initiative run by Vicharanashala. Its purpose is to upskill degree college teachers in AI literacy, enabling them to integrate AI tools and modern pedagogical techniques into their teaching and academic research.',
+    category: 'programs',
     status: 'published'
   },
   {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept multiple payment methods including: Credit/Debit Cards (Visa, MasterCard, American Express), Net Banking, UPI, Bank Transfers, and popular digital wallets. All transactions are secure and encrypted.',
-    category: 'billing',
+    question: 'Who is eligible to apply for internships at Vicharanashala?',
+    answer: 'Students, software engineers, and research aspirants interested in Educational Technology, AI integration, and systems design are eligible to apply. Internships focus on building educational tools and platforms under research supervision.',
+    category: 'careers',
     status: 'published'
   },
   {
-    question: 'Can I upgrade my hosting plan later?',
-    answer: 'Yes, you can upgrade your hosting plan at any time through your dashboard. The upgrade is seamless with no downtime, and you will only pay the prorated difference for the remaining billing period.',
-    category: 'hosting',
-    status: 'published'
-  },
-  {
-    question: 'Do you provide SSL certificates?',
-    answer: 'Yes, we offer free SSL certificates with all hosting plans. We also provide premium SSL certificates with extended validation (EV) for businesses requiring maximum security and trust indicators.',
-    category: 'security',
-    status: 'published'
-  },
-  {
-    question: 'What is your refund policy?',
-    answer: 'We offer a 30-day money-back guarantee on all hosting plans. If you are not satisfied with our services within the first 30 days, you can request a full refund. Domain registration fees are non-refundable once processed.',
-    category: 'billing',
-    status: 'published'
-  },
-  {
-    question: 'How do I get started with Samagama.in services?',
-    answer: 'Getting started is easy: 1) Create a free account on our website, 2) Choose the service you need, 3) Complete the registration or purchase, 4) Our team will guide you through the setup process. For enterprise customers, we offer personalized onboarding assistance.',
-    category: 'general',
+    question: 'What technologies are used in Vicharanashala projects?',
+    answer: 'The lab uses a modern web stack including React.js, Node.js, MongoDB, Python, and Generative AI SDKs (like Google Gemini) to build scalable, interactive educational platforms.',
+    category: 'technology',
     status: 'published'
   }
 ];
 
 const seedQuestions = [
-  { text: 'What services are available on Samagama.in?', category: 'general', status: 'new' },
-  { text: 'How to contact support team?', category: 'support', status: 'new' },
-  { text: 'What hosting plans do you offer?', category: 'hosting', status: 'new' },
-  { text: 'Is there a free trial available?', category: 'billing', status: 'new' },
-  { text: 'How to upgrade my account?', category: 'account', status: 'new' },
-  { text: 'Do you offer custom domain registration?', category: 'domains', status: 'new' },
-  { text: 'What payment options are accepted?', category: 'billing', status: 'new' },
-  { text: 'How secure is my data with Samagama.in?', category: 'security', status: 'new' },
-  { text: 'Can I get a refund if not satisfied?', category: 'billing', status: 'new' },
-  { text: 'What is the response time for support tickets?', category: 'support', status: 'new' }
+  { text: 'What is Vicharanashala?', category: 'general', status: 'new' },
+  { text: 'How do I apply for an internship at Vicharanashala?', category: 'careers', status: 'new' },
+  { text: 'Who can I email for collaboration inquiries?', category: 'contact', status: 'new' },
+  { text: 'What does ViBe platform do?', category: 'projects', status: 'new' },
+  { text: 'Are there any courses on AI conducted by the lab?', category: 'programs', status: 'new' }
 ];
 
 async function seed() {
