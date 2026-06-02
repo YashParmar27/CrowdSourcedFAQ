@@ -83,6 +83,7 @@ export const getFAQs = async (req, res) => {
 
     if (status) filter.status = status;
     if (category) filter.category = category;
+    if (req.query.needs_review === 'true') filter.needs_review = true;
 
     const faqs = await FAQ.find(filter)
       .populate('source_questions', 'text')
@@ -130,7 +131,13 @@ export const updateFAQ = async (req, res) => {
     const { id } = req.params;
     const { question, answer, category, status } = req.body;
 
-    const updateFields = { updated_at: Date.now() };
+    const updateFields = { 
+      updated_at: Date.now(),
+      needs_review: false,
+      ratings_count: 0,
+      ratings_sum: 0,
+      average_rating: 0
+    };
     if (question) updateFields.question = question;
     if (answer) updateFields.answer = answer;
     if (category) updateFields.category = category;
@@ -358,6 +365,66 @@ export const getMyFAQs = async (req, res) => {
       .populate('source_questions', 'text status')
       .sort({ created_at: -1 });
     res.json(faqs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+  export const submitRating = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { rating, oldRating } = req.body;
+  
+      const ratingVal = Number(rating);
+      if (isNaN(ratingVal) || ratingVal < 1 || ratingVal > 5) {
+        return res.status(400).json({ error: 'Rating must be a number between 1 and 5.' });
+      }
+  
+      const faq = await FAQ.findById(id);
+      if (!faq) {
+        return res.status(404).json({ error: 'FAQ not found.' });
+      }
+  
+      if (oldRating) {
+        const oldVal = Number(oldRating);
+        if (!isNaN(oldVal) && oldVal >= 1 && oldVal <= 5) {
+          faq.ratings_sum = (faq.ratings_sum || 0) - oldVal + ratingVal;
+          // ratings_count remains the same
+        }
+      } else {
+        faq.ratings_count = (faq.ratings_count || 0) + 1;
+        faq.ratings_sum = (faq.ratings_sum || 0) + ratingVal;
+      }
+      
+      faq.average_rating = faq.ratings_count > 0 
+        ? Number((faq.ratings_sum / faq.ratings_count).toFixed(2))
+        : 0;
+
+    // Flag for review if average rating falls below 3.0 after at least 3 ratings
+    if (faq.average_rating < 3.0 && faq.ratings_count >= 3) {
+      faq.needs_review = true;
+      
+      // Log system activity for flagged FAQ
+      await logActivity(
+        'faq_flagged_for_review',
+        `FAQ flagged for low rating (${faq.average_rating} stars): ${faq.question.substring(0, 50)}...`,
+        'FAQ',
+        faq._id,
+        null,
+        'System',
+        'System',
+        { average_rating: faq.average_rating, ratings_count: faq.ratings_count }
+      );
+    }
+
+    await faq.save();
+
+    res.json({
+      message: 'Rating submitted successfully.',
+      ratings_count: faq.ratings_count,
+      average_rating: faq.average_rating,
+      needs_review: faq.needs_review
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

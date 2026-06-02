@@ -7,6 +7,10 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [ratedFaqs, setRatedFaqs] = useState(() => {
+    const saved = localStorage.getItem('ratedFaqs');
+    return saved ? JSON.parse(saved) : {};
+  });
 
   useEffect(() => {
     fetchFaqs();
@@ -31,6 +35,22 @@ const Home = () => {
       await api.patch(`/api/faqs/${faqId}/view`);
     } catch (err) {
       console.error('Failed to track view:', err);
+    }
+  };
+
+  const submitRating = async (faqId, rating) => {
+    try {
+      const oldRating = ratedFaqs[faqId];
+      if (oldRating === rating) return; // Don't submit if it's the same rating
+
+      await api.post(`/api/faqs/${faqId}/rate`, { rating, oldRating });
+      setRatedFaqs(prev => {
+        const newState = { ...prev, [faqId]: rating };
+        localStorage.setItem('ratedFaqs', JSON.stringify(newState));
+        return newState;
+      });
+    } catch (err) {
+      console.error('Failed to submit rating:', err);
     }
   };
 
@@ -116,8 +136,33 @@ const Home = () => {
                   <span className="text-xs text-blue-600 mt-1 inline-block">{faq.category}</span>
                 )}
               </summary>
-              <div className="px-5 pb-4 text-gray-600 border-t pt-3">
-                {faq.answer}
+              <div className="px-5 pb-4 text-gray-600 border-t pt-3 flex flex-col gap-3">
+                <div>{faq.answer}</div>
+                <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-500">
+                    {ratedFaqs[faq._id] ? 'Your Rating:' : 'Helpful?'}
+                  </span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          submitRating(faq._id, star);
+                        }}
+                        className={`focus:outline-none transition-colors ${
+                          ratedFaqs[faq._id] >= star
+                            ? 'text-yellow-400'
+                            : 'text-gray-300 hover:text-yellow-400'
+                        }`}
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </details>
           ))}
