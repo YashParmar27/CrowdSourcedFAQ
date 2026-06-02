@@ -22,6 +22,7 @@ const Layout = () => {
               
               <div className="hidden md:flex md:ml-8 md:space-x-4">
                 <Link to="/" className="px-3 py-2 text-gray-700 hover:text-blue-600 text-sm font-medium">Home</Link>
+                 <Link to="/discussions" className="px-3 py-2 text-gray-700 hover:text-blue-600 text-sm font-medium">Discussions</Link>
                 {user && (
                   <Link to="/submit-question" className="px-3 py-2 text-gray-700 hover:text-blue-600 text-sm font-medium">
                     Submit Question
@@ -110,6 +111,13 @@ const Layout = () => {
                 >
                   Home
                 </Link>
+                                <Link 
+                                  to="/discussions" 
+                                  className="px-3 py-2 text-gray-700 hover:bg-gray-50 rounded text-sm font-medium"
+                                  onClick={() => setMobileMenuOpen(false)}
+                                >
+                                  Discussions
+                                </Link>
                 
                 {user ? (
                   <>

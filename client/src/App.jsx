@@ -13,6 +13,8 @@ import AdminActivities from './pages/AdminActivities';
 import AdminAnalytics from './pages/AdminAnalytics';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Discussions from './pages/Discussions';
+import DiscussionThread from './pages/DiscussionThread';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
@@ -47,6 +49,8 @@ function AppRoutes() {
         <Route path="register" element={user ? <Navigate to="/" /> : <Register />} />
         <Route path="forgot-password" element={user ? <Navigate to="/" /> : <ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="discussions" element={<Discussions />} />
+        <Route path="discussions/:id" element={<DiscussionThread />} />
         <Route path="submit-question" element={<SubmitQuestion />} />
         <Route path="dashboard" element={
           <ProtectedRoute><Dashboard /></ProtectedRoute>
