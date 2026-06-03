@@ -12,7 +12,6 @@
 *Developed by [Team One](CONTRIBUTING.md) as an academic project*
 
 ### 🚀 [Try the Live Demo Here!](https://your-frontend-url.onrender.com)
-*(Note: Please replace the link above with your actual Render frontend URL)*
 
 </div>
 
