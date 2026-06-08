@@ -36,7 +36,7 @@
 | Bhavesh Malviya | 23bcp254@sot.pdpu.ac.in | [@BhaveshMalviya](https://github.com/BhaveshMalviya) |
 | Anoogna Gunjari | anoognagunjari@gmail.com | [@anoognagunjari](https://github.com/anoognagunjari) |
 | Yash Parmar | yparmar24020@gmail.com | [@yashparmar](https://github.com/yashparmar) |
-| Muskan Kumari | muskankumari5386@gmail.com | [@MuskanKumari](https://github.com/MuskanKumari) |
+| Muskan Kumari | muskankumari5386@gmail.com | [@MuskanKumari](https://github.com/tulipcoder) |
 | Siddharth Sadhu | siddharthsadhu28@gmail.com | [@siddharthsadhu](https://github.com/siddharthsadhu) |
 | Swanand Sirsikar | swanand.sirsikar@gmail.com | [@swanandsirsikar](https://github.com/swanandsirsikar) |
 | Govind Upadhyay | govindupadhyay1307@gmail.com | [@govindupadhyay](https://github.com/govindupadhyay) |
