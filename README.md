@@ -369,6 +369,4 @@ Admin publishes
 
 MIT License. See [LICENSE](LICENSE) for details.
 
----
-
-*Developed by Team One as an academic project.*
+--
