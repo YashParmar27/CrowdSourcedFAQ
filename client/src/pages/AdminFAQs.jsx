@@ -355,36 +355,81 @@ const AdminFAQs = () => {
       )}
 
       {importModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Bulk Import FAQs</h2>
-              <button onClick={() => setImportModalOpen(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Format: <code className="bg-gray-100 px-2 py-1 rounded">question | answer | category</code>
-              <br />One FAQ per line. Category is optional (defaults to "general").
-            </p>
-            <textarea
-              value={importData}
-              onChange={(e) => setImportData(e.target.value)}
-              rows={10}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-              placeholder="What is your return policy? | We offer 30-day returns | billing&#10;How do I contact support? | Email us at support@example.com | support"
-            />
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={handleBulkImport}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >Import FAQs</button>
-              <button
-                onClick={() => { setImportModalOpen(false); setImportData(''); }}
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-              >Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Bulk Import FAQs</h2>
+        <button onClick={() => setImportModalOpen(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
+      </div>
+      <p className="text-sm text-gray-600 mb-2">
+        Format: <code className="bg-gray-100 px-2 py-1 rounded">question | answer | category</code>
+        <br />One FAQ per line. Category is optional (defaults to "general").
+      </p>
+
+      {/* CSV Upload */}
+      <div className="mb-4 p-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+        <p className="text-sm text-gray-600 mb-2 font-medium">📂 Upload CSV File</p>
+        <p className="text-xs text-gray-500 mb-2">
+          CSV must have <code className="bg-gray-100 px-1 rounded">question</code> and <code className="bg-gray-100 px-1 rounded">answer</code> columns. Optional: <code className="bg-gray-100 px-1 rounded">category</code>.
+        </p>
+        <input
+          type="file"
+          accept=".csv"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const text = event.target.result;
+              const lines = text.trim().split('\n');
+              const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+              const questionIdx = headers.indexOf('question');
+              const answerIdx = headers.indexOf('answer');
+              const categoryIdx = headers.indexOf('category');
+
+              if (questionIdx === -1 || answerIdx === -1) {
+                setError('CSV must have "question" and "answer" columns.');
+                return;
+              }
+
+              const parsed = [];
+              for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(',').map(c => c.trim().replace(/"/g, ''));
+                const question = cols[questionIdx];
+                const answer = cols[answerIdx];
+                const category = categoryIdx !== -1 ? cols[categoryIdx] : 'general';
+                if (question && answer) parsed.push(`${question} | ${answer} | ${category}`);
+              }
+
+              setImportData(parsed.join('\n'));
+            };
+            reader.readAsText(file);
+          }}
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer"
+        />
+      </div>
+
+      <p className="text-xs text-gray-400 mb-2">Or type manually below:</p>
+      <textarea
+        value={importData}
+        onChange={(e) => setImportData(e.target.value)}
+        rows={8}
+        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+        placeholder="What is your return policy? | We offer 30-day returns | billing&#10;How do I contact support? | Email us at support@example.com | support"
+      />
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={handleBulkImport}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        >Import FAQs</button>
+        <button
+          onClick={() => { setImportModalOpen(false); setImportData(''); }}
+          className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+        >Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

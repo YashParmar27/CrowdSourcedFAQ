@@ -417,14 +417,55 @@ const AdminQuestions = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Bulk Import Questions</h2>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-2">
               Format: <code className="bg-gray-100 px-1 rounded">question_text | category</code>
               <br />One question per line. Category is optional (defaults to "general").
             </p>
+
+            {/* CSV Upload */}
+            <div className="mb-4 p-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+              <p className="text-sm text-gray-600 mb-2 font-medium">📂 Upload CSV File</p>
+              <p className="text-xs text-gray-500 mb-2">CSV must have a <code className="bg-gray-100 px-1 rounded">question</code> column. Optional: <code className="bg-gray-100 px-1 rounded">category</code> column.</p>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    const text = event.target.result;
+                    const lines = text.trim().split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+                    const questionIdx = headers.indexOf('question');
+                    const categoryIdx = headers.indexOf('category');
+
+                    if (questionIdx === -1) {
+                      setError('CSV must have a "question" column.');
+                      return;
+                    }
+
+                    const parsed = [];
+                    for (let i = 1; i < lines.length; i++) {
+                      const cols = lines[i].split(',').map(c => c.trim().replace(/"/g, ''));
+                      const question = cols[questionIdx];
+                      const category = categoryIdx !== -1 ? cols[categoryIdx] : 'general';
+                      if (question) parsed.push(`${question} | ${category}`);
+                    }
+
+                    setImportData(parsed.join('\n'));
+                  };
+                  reader.readAsText(file);
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer"
+              />
+            </div>
+
+            <p className="text-xs text-gray-400 mb-2">Or type manually below:</p>
             <textarea
               value={importData}
               onChange={(e) => setImportData(e.target.value)}
-              rows={10}
+              rows={8}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"
               placeholder="How do I reset my password? | account&#10;What payment methods do you accept? | billing&#10;Is there a free trial available? | billing"
             />
