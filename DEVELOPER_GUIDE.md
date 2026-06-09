@@ -550,8 +550,3 @@ npm run install:all  # Install all dependencies
 | CLIENT_URL | Frontend URL for CORS |
 | ADMIN_EMAIL | Email that auto-promotes to admin |
 
----
-
-## Questions?
-
-Open an issue at https://github.com/FiscalMindset/FAQ/issues
