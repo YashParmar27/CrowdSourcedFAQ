@@ -15,16 +15,26 @@ const parseRange = (range) => {
     return { from: new Date(now - 30 * 24 * 60 * 60 * 1000), to: now };
   }
   if (typeof range === 'string') {
+    if (range === 'custom') {
+      // 'custom' is a UI signal — the actual dates must be provided separately.
+      // The client always sends { from, to } when range === 'custom', so this
+      // branch should not be reached in normal use. Throw a clear 400 if it is.
+      throw new Error("range 'custom' requires explicit { from, to } dates");
+    }
     const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : null;
     if (days) {
       return { from: new Date(now - days * 24 * 60 * 60 * 1000), to: now };
     }
+    throw new Error(`Invalid range preset: '${range}'. Use '7d' | '30d' | '90d' or { from, to }`);
   }
   if (typeof range === 'object' && range.from && range.to) {
-    return { from: new Date(range.from), to: new Date(range.to) };
+    const from = new Date(range.from);
+    const to = new Date(range.to);
+    if (isNaN(from.getTime())) throw new Error('Invalid from date');
+    if (isNaN(to.getTime())) throw new Error('Invalid to date');
+    return { from, to };
   }
-  // fall through: 30d
-  return { from: new Date(now - 30 * 24 * 60 * 60 * 1000), to: now };
+  throw new Error('range must be a preset string or { from, to } object');
 };
 
 const validateRange = (from, to) => {
@@ -210,20 +220,27 @@ const runAnalyzeJob = async (job, source, { from, to } = {}) => {
 export const startAnalyze = async (req, res) => {
   try {
     const { id } = req.params;
-    const { range } = req.body;
+    const { range, force } = req.body;
     const source = await DiscourseSource.findById(id);
     if (!source) return res.status(404).json({ error: 'Source not found.' });
 
-    const { from, to } = parseRange(range);
-    validateRange(from, to);
+    let from, to;
+    try {
+      ({ from, to } = parseRange(range));
+      validateRange(from, to);
+    } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
 
-    // cache check
-    const cacheCutoff = new Date(Date.now() - CACHE_MINUTES * 60 * 1000);
-    const cachedJob = await DiscourseAnalyzeJob.findOne({
-      source_id: id, status: 'done', finished_at: { $gte: cacheCutoff }
-    }).sort({ finished_at: -1 });
-    if (cachedJob) {
-      return res.json({ request_id: cachedJob._id, cached: true, suggestions_created: cachedJob.suggestion_ids.length });
+    // cache check (skipped if force === true)
+    if (!force) {
+      const cacheCutoff = new Date(Date.now() - CACHE_MINUTES * 60 * 1000);
+      const cachedJob = await DiscourseAnalyzeJob.findOne({
+        source_id: id, status: 'done', finished_at: { $gte: cacheCutoff }
+      }).sort({ finished_at: -1 });
+      if (cachedJob) {
+        return res.json({ request_id: cachedJob._id, cached: true, suggestions_created: cachedJob.suggestion_ids.length });
+      }
     }
 
     const job = new DiscourseAnalyzeJob({ source_id: id, range: typeof range === 'string' ? range : 'custom', from, to });

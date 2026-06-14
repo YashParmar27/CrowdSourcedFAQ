@@ -20,7 +20,7 @@ const AdminDiscourse = () => {
   const [sourceModal, setSourceModal] = useState({ open: false, editing: null });
 
   // Analyze state
-  const [analyzeForm, setAnalyzeForm] = useState({ sourceId: '', range: '7d', from: '', to: '' });
+  const [analyzeForm, setAnalyzeForm] = useState({ sourceId: '', range: '7d', from: '', to: '', force: false });
   const [analyzeStatus, setAnalyzeStatus] = useState(null);
   const pollingRef = useRef(null);
 
@@ -133,6 +133,7 @@ const AdminDiscourse = () => {
     const payload = analyzeForm.range === 'custom'
       ? { from: analyzeForm.from, to: analyzeForm.to }
       : { range: analyzeForm.range };
+    if (analyzeForm.force) payload.force = true;
 
     try {
       setLoading(true);
@@ -330,6 +331,13 @@ const AdminDiscourse = () => {
                     className="px-3 py-2 border rounded text-sm" />
                 </div>
               )}
+              <div className="flex items-center gap-2 mb-3">
+                <label className="flex items-center gap-1 text-sm text-gray-700 cursor-pointer">
+                  <input type="checkbox" checked={analyzeForm.force} onChange={e => setAnalyzeForm({ ...analyzeForm, force: e.target.checked })}
+                    className="rounded" />
+                  Force re-analyze (bypass 5-min cache)
+                </label>
+              </div>
               <button onClick={startAnalyze} disabled={loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50">
                 {loading ? 'Running...' : 'Run Analysis'}
@@ -477,7 +485,11 @@ const AdminDiscourse = () => {
               className="w-full px-3 py-2 border rounded mb-3 text-sm" />
             <datalist id="cat-list">{categories.map(c => <option key={c} value={c} />)}</datalist>
             <div className="flex gap-2 mt-4">
-              <button onClick={submitEdit} className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700">Save + Approve as Draft</button>
+              <button
+                onClick={submitEdit}
+                disabled={!editModal.form.question.trim() || !editModal.form.answer.trim()}
+                className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >Save + Approve as Draft</button>
               <button onClick={() => setEditModal({ open: false, suggestion: null, form: { question: '', answer: '', category: '' } })}
                 className="px-4 py-2 bg-gray-200 rounded text-sm">Cancel</button>
             </div>
@@ -529,8 +541,13 @@ const AnalyzeStatus = ({ status }) => {
 };
 
 const SourceModal = ({ editing, initialForm, onClose, onSave }) => {
+  // For edits, the server returns a masked api_key (e.g. '••••abcd').
+  // We strip it from the form so the user doesn't see confusing dots in the
+  // input. The server ignores api_key in PATCH requests anyway (see
+  // updateSource in discourse.controller.js), so this is purely a UX choice.
+  // The api_key field below is also conditionally hidden for edits.
   const [form, setForm] = useState(initialForm || (editing ? {
-    name: editing.name, base_url: editing.base_url, api_key: editing.api_key || '',
+    name: editing.name, base_url: editing.base_url,
     api_username: editing.api_username || '', channel: editing.channel, is_active: editing.is_active
   } : { name: '', base_url: '', api_key: '', api_username: '', channel: '', is_active: true }));
 
@@ -549,18 +566,25 @@ const SourceModal = ({ editing, initialForm, onClose, onSave }) => {
             <input value={form.base_url} onChange={e => setForm({ ...form, base_url: e.target.value })}
               className="w-full px-3 py-2 border rounded" placeholder="https://meta.discourse.org" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block font-medium mb-1">API Key <span className="text-gray-400">(optional)</span></label>
-              <input value={form.api_key} onChange={e => setForm({ ...form, api_key: e.target.value })}
-                className="w-full px-3 py-2 border rounded" placeholder="leave blank for public" />
+          {!editing && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block font-medium mb-1">API Key <span className="text-gray-400">(optional)</span></label>
+                <input value={form.api_key} onChange={e => setForm({ ...form, api_key: e.target.value })}
+                  className="w-full px-3 py-2 border rounded" placeholder="leave blank for public" />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">API Username <span className="text-gray-400">(optional)</span></label>
+                <input value={form.api_username} onChange={e => setForm({ ...form, api_username: e.target.value })}
+                  className="w-full px-3 py-2 border rounded" placeholder="system" />
+              </div>
             </div>
-            <div>
-              <label className="block font-medium mb-1">API Username <span className="text-gray-400">(optional)</span></label>
-              <input value={form.api_username} onChange={e => setForm({ ...form, api_username: e.target.value })}
-                className="w-full px-3 py-2 border rounded" placeholder="system" />
-            </div>
-          </div>
+          )}
+          {editing && (
+            <p className="text-xs text-gray-500 bg-gray-50 border rounded p-2">
+              🔒 API key is hidden. To rotate, delete this source and re-add it.
+            </p>
+          )}
           <div>
             <label className="block font-medium mb-1">Category Slug</label>
             <input value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value })}
