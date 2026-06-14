@@ -24,7 +24,7 @@ const discourseSuggestionSchema = new mongoose.Schema({
   reviewed_by:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   reviewed_at:     { type: Date },
   raw_clusters:    { type: mongoose.Schema.Types.Mixed, default: {} }
-});
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 discourseSuggestionSchema.index({ source_id: 1, status: 1 });
 discourseSuggestionSchema.index({ generated_at: -1 });

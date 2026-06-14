@@ -54,6 +54,18 @@ function buildUrlWithAuth(base, path, { api_key, api_username } = {}) {
   return url.toString();
 }
 
+// NOTE on auth: Discourse's public read endpoints (GET /c/{slug}.json,
+// GET /t/{id}.json) only accept API credentials as URL query parameters
+// (?api_key=...&api_username=...). They do NOT support the standard
+// Authorization: Bearer header for public-read endpoints — header-based
+// auth is only used for the admin API.
+//
+// Risk-mitigations applied elsewhere in this module:
+//   - The credential is never sent to the browser: the controller strips
+//     api_key from listSources / createSource / updateSource responses
+//     (see sanitizeSource() in discourse.controller.js).
+//   - api_key is intentionally NOT patchable via updateSource to prevent
+//     a blank-string form submission from wiping the stored credential.
 async function discourseFetch(url, { api_key, api_username, timeoutMs = 15000 } = {}) {
   const fullUrl = buildUrlWithAuth(url, '', { api_key, api_username });
   const res = await fetch(fullUrl, {

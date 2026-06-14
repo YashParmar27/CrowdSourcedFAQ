@@ -21,7 +21,7 @@ const activitySchema = new mongoose.Schema({
     required: true
   },
   description: { type: String, required: true },
-  entity_type: { type: String, enum: ['FAQ', 'Question', 'User'] },
+  entity_type: { type: String, enum: ['FAQ', 'Question', 'User', 'DiscourseSource', 'DiscourseSuggestion'] },
   entity_id: { type: mongoose.Schema.Types.ObjectId },
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   user_email: String,

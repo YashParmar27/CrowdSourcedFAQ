@@ -10,7 +10,6 @@ const discourseSourceSchema = new mongoose.Schema({
   is_active:      { type: Boolean, default: true },
   last_synced_at: { type: Date, default: null },
   created_by:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  created_at:     { type: Date, default: Date.now }
-});
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 export default mongoose.model('DiscourseSource', discourseSourceSchema);

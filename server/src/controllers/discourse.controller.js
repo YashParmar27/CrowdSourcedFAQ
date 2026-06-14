@@ -3,6 +3,7 @@ import DiscourseSuggestion from '../models/DiscourseSuggestion.js';
 import DiscourseAnalyzeJob from '../models/DiscourseAnalyzeJob.js';
 import FAQ from '../models/FAQ.js';
 import Activity from '../models/Activity.js';
+import mongoose from 'mongoose';
 import { fetchDiscussions, clusterAndDraft, findSimilarFaqs } from '../services/discourse.service.js';
 
 const CACHE_MINUTES = parseInt(process.env.DISCOURSE_ANALYZE_CACHE_MINUTES || '5', 10);
@@ -48,10 +49,23 @@ const logActivity = async (type, description, entity_type, entity_id, req, metad
 // ---------------------------------------------------------------------------
 // Sources CRUD
 // ---------------------------------------------------------------------------
+
+// Strip the API key from the response. Return a masked value + a boolean
+// so the admin UI can show "configured" without exposing the secret.
+const sanitizeSource = (s) => {
+  const obj = typeof s.toObject === 'function' ? s.toObject() : s;
+  const { api_key, ...rest } = obj;
+  return {
+    ...rest,
+    api_key: api_key ? '••••' + api_key.slice(-4) : '',
+    has_api_key: !!api_key
+  };
+};
+
 export const listSources = async (req, res) => {
   try {
     const sources = await DiscourseSource.find().sort({ created_at: -1 });
-    res.json(sources);
+    res.json(sources.map(sanitizeSource));
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
@@ -71,18 +85,25 @@ export const createSource = async (req, res) => {
     });
     await source.save();
     await logActivity('discourse_source_added', `Discourse source added: ${name}`, 'DiscourseSource', source._id, req, { channel });
-    res.status(201).json(source);
+    res.status(201).json(sanitizeSource(source));
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
 export const updateSource = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = { ...req.body, updated_at: new Date() };
+    if (req.body.base_url !== undefined && !/^https?:\/\//i.test(req.body.base_url)) {
+      return res.status(400).json({ error: 'base_url must start with http:// or https://' });
+    }
+    const updates = { ...req.body };
     delete updates._id;
+    // api_key is intentionally not patchable — a blank string from the form
+    // would otherwise wipe the stored credential. To rotate the key, re-create
+    // the source.
+    delete updates.api_key;
     const source = await DiscourseSource.findByIdAndUpdate(id, updates, { new: true });
     if (!source) return res.status(404).json({ error: 'Source not found.' });
-    res.json(source);
+    res.json(sanitizeSource(source));
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
@@ -261,7 +282,12 @@ export const listRuns = async (req, res) => {
   try {
     const { source_id } = req.query;
     const match = {};
-    if (source_id) match.source_id = new (await import('mongoose')).default.Types.ObjectId(source_id);
+    if (source_id) {
+      if (!mongoose.Types.ObjectId.isValid(source_id)) {
+        return res.status(400).json({ error: 'Invalid source_id' });
+      }
+      match.source_id = new mongoose.Types.ObjectId(source_id);
+    }
     const runs = await DiscourseAnalyzeJob.aggregate([
       { $match: match },
       { $sort: { started_at: -1 } },
@@ -363,18 +389,29 @@ export const reviewSuggestion = async (req, res) => {
 export const exportSuggestionsCsv = async (req, res) => {
   try {
     const suggestions = await DiscourseSuggestion.find().sort({ generated_at: -1 });
+
+    // CSV escape: quote-wrap, double-up quotes, and prefix any cell that starts
+    // with a character that Excel/Sheets would interpret as a formula (=, +, -, @,
+    // tab, CR) with a single quote. This is the standard CSV-injection mitigation.
+    const csvEscape = (val) => {
+      if (val == null) return '';
+      let s = String(val);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return '"' + s.replace(/"/g, '""') + '"';
+    };
+
     const csv = [
       ['Question', 'Answer', 'Category', 'Status', 'ClusterSize', 'ReferencesCount', 'GeneratedAt'].join(','),
       ...suggestions.map(s => [
-        `"${(s.question || '').replace(/"/g, '""')}"`,
-        `"${(s.answer || '').replace(/"/g, '""')}"`,
-        s.category || 'general',
-        s.status,
+        csvEscape(s.question),
+        csvEscape(s.answer),
+        csvEscape(s.category || 'general'),
+        csvEscape(s.status),
         s.cluster_size || 0,
         (s.references || []).length,
         new Date(s.generated_at).toISOString()
       ].join(','))
-    ].join('\n');
+    ].join('\r\n');
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=discourse_suggestions_${new Date().toISOString().split('T')[0]}.csv`);
     res.send(csv);

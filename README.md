@@ -291,19 +291,21 @@ Authentication is via a Bearer token in the `Authorization` header.
 
 ### Discourse — `/api/discourse` (admin-only)
 
+All request/response field names below are snake_case (matches Mongoose schema serialization). The list endpoint does not return the `api_key` field — instead it returns a masked `api_key` and a `has_api_key` boolean.
+
 | Method | Path | Description |
 |---|---|---|
 | GET    | `/sources` | List configured Discourse sources |
-| POST   | `/sources` | Create a Discourse source (`name`, `baseUrl`, optional `apiKey`/`apiUsername`, `channel`) |
-| PATCH  | `/sources/:id` | Update a source |
+| POST   | `/sources` | Create a Discourse source (`name`, `base_url`, optional `api_key`/`api_username`, `channel`) |
+| PATCH  | `/sources/:id` | Update a source (`api_key` is intentionally not patchable) |
 | DELETE | `/sources/:id` | Delete a source (cascades to its suggestions and jobs) |
 | POST   | `/sources/:id/test` | Test connection — returns post count from the last 7 days |
-| POST   | `/sources/:id/analyze` | Start an analyze job (`{ range: "7d" \| "30d" \| "90d" \| { from, to } }`) |
-| GET    | `/jobs/:requestId` | Poll job status (`step`, `progress`, `suggestionIds`) |
+| POST   | `/sources/:id/analyze` | Start an analyze job. Body: `{ range: "7d" \| "30d" \| "90d" }` (preset) **or** `{ from, to }` (custom ISO dates) |
+| GET    | `/jobs/:request_id` | Poll job status. Response includes `step`, `progress`, `suggestion_ids` |
 | GET    | `/runs` | List recent analyze runs (for the Review Queue filter) |
-| GET    | `/suggestions` | List suggestions (`?status=&sourceId=&runId=`) |
+| GET    | `/suggestions` | List suggestions. Query: `?status=&source_id=&run_id=&since=&until=` |
 | GET    | `/suggestions/:id` | Get one suggestion |
-| PATCH  | `/suggestions/:id/review` | Review a suggestion: `{ action: "approve" \| "reject" \| "edit", overrides? }` |
+| PATCH  | `/suggestions/:id/review` | Review a suggestion. Body: `{ action: "approve" \| "reject" \| "edit", overrides?: { question?, answer?, category? } }` |
 | DELETE | `/suggestions/:id` | Delete a suggestion |
 | GET    | `/suggestions-export/csv` | Export all suggestions to CSV |
 

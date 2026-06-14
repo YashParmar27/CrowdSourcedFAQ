@@ -127,7 +127,12 @@ const AdminDiscourse = () => {
   // -------- Analyze
   const startAnalyze = async () => {
     if (!analyzeForm.sourceId) { flash('error', 'Pick a source first.'); return; }
-    const payload = { range: analyzeForm.range, ...(analyzeForm.range === 'custom' ? { from: analyzeForm.from, to: analyzeForm.to } : {}) };
+    // The backend's parseRange() expects a string ('7d' | '30d' | '90d') for
+    // preset ranges, or an object { from, to } for custom. Sending
+    // { range: 'custom', from, to } would fall through to the 30d default.
+    const payload = analyzeForm.range === 'custom'
+      ? { from: analyzeForm.from, to: analyzeForm.to }
+      : { range: analyzeForm.range };
 
     try {
       setLoading(true);
@@ -171,12 +176,16 @@ const AdminDiscourse = () => {
   };
 
   // -------- Review
+  // Map action -> past-tense so the toast reads correctly
+  // ("Suggestion approved." / "Suggestion rejected." / "Suggestion edited."
+  // rather than "rejectd" / "editd").
+  const REVIEW_PAST = { approve: 'approved', reject: 'rejected', edit: 'edited' };
   const review = async (id, action, overrides) => {
     try {
       await api.patch(`/api/discourse/suggestions/${id}/review`, { action, overrides });
-      flash('success', `Suggestion ${action}d.`);
+      flash('success', `Suggestion ${REVIEW_PAST[action] || action}.`);
       fetchSuggestions();
-    } catch (e) { flash('error', e.response?.data?.error || `${action} failed.`); }
+    } catch (e) { flash('error', e.response?.data?.error || `${REVIEW_PAST[action] || action} failed.`); }
   };
 
   const openEdit = (s) => {

@@ -12,7 +12,7 @@ const discourseAnalyzeJobSchema = new mongoose.Schema({
   finished_at:    { type: Date },
   error:          { type: String },
   suggestion_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DiscourseSuggestion' }]
-});
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 discourseAnalyzeJobSchema.index({ source_id: 1, started_at: -1 });
 discourseAnalyzeJobSchema.index({ status: 1, started_at: -1 });
